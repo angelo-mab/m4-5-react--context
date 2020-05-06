@@ -22,30 +22,30 @@ const App = () => {
 
   return (
     <>
-      <Home />
+      <Home user={user} setUser={setUser}/>
       <Sidebar user={user} />
     </>
   );
 };
 
-const Home = () => {
+const Home = ({user, setUser}) => {
   return (
     <>
-      <Header />
+      <Header user={user} setUser={setUser}/>
       <MainContent />
     </>
   );
 };
 
-const Header = () => {
+const Header = ({user, setUser} => {
   return (
     <header>
-      <Navigation />
+      <Navigation user={user} setUser={setUser}/>
     </header>
   );
 };
 
-const Navigation = () => {
+const Navigation = ({user, setUser}) => {
   return (
     <nav>
       <ul>
@@ -58,7 +58,7 @@ const Navigation = () => {
           </li>
         ) : (
           <li>
-            <LoginDialogTrigger />
+            <LoginDialogTrigger user={user} setUser={setUser}/>
           </li>
         )}
       </ul>
@@ -66,7 +66,7 @@ const Navigation = () => {
   );
 };
 
-const LoginDialogTrigger = () => {
+const LoginDialogTrigger = ({user, setUser}) => {
   // Some stuff to show a button and handle showing
   // the dialog on click
 
@@ -112,7 +112,7 @@ export const UserContext = React.createContext(null);
 
 const App = () => {
   return (
-    <UserContext.Provider value={{ username: 'Alfalfa' }}>
+    <UserContext.Provider value={{ username: "Alfalfa" }}>
       <Header />
       <Main>
         <YourAppHere />
@@ -129,7 +129,7 @@ const App = () => {
 Next, we can _consume_ that context anywhere below the Provider with `useContext`.
 
 ```js
-import { UserContext } from '../App';
+import { UserContext } from "../App";
 
 const Profile = () => {
   const data = React.useContext(UserContext);
@@ -149,30 +149,38 @@ Update the following components to use context
 ---
 
 ```jsx
-const App = () => {
-  const [user, setUser] = React.useState({ username: 'Alfalfa' });
+export const UserContext = React.createContext(null);
 
-  return <Home user={user} setUser={setUser} />;
+const App = () => {
+  const [user, setUser] = React.useState({ username: "Alfalfa" }); //**
+
+  return (
+    <UserContext.Provider value={{ user, setUser }}>
+      <Home />;
+    </UserContext.Provider>
+  );
 };
 
-const Home = ({ user, setUser }) => {
+const Home = () => {
   return (
     <>
-      <Header user={user} setUser={setUser} />
+      <Header />
       <MainContent />
     </>
   );
 };
 
-const Header = ({ user, setUser }) => {
+const Header = () => {
   return (
     <header>
-      <Navigation user={user} setUser={setUser} />
+      <Navigation />
     </header>
   );
 };
 
-const Navigation = ({ user, setUser }) => {
+const Navigation = () => {
+  const { user, setUser } = React.useContext(UserContext); // you set this when you need it.
+
   return (
     <nav>
       <ul>
@@ -196,31 +204,41 @@ const Navigation = ({ user, setUser }) => {
 ---
 
 ```jsx
+export const DialogContext = React.createContext(null);
 const App = () => {
   const [dialog, setDialog] = React.useState(null);
 
   return (
-    <>
-      <MainContent dialog={dialog} setDialog={setDialog} />
-      <Dialog currentDialog={dialog} />
-    </>
+    <DialogContext.Provider value={{ dialog, setDialog }}>
+      <MainContent />
+      <Dialog />
+    </DialogContext.Provider>
   );
 };
 
-const MainContent = ({ dialog, setDialog }) => {
+const MainContent = () => {
+  const { setDialog } = React.useContext(DialogContext);
+
   return (
     <>
       <Sidebar>
         <Link>Home</Link>
         <Link>About</Link>
-        <LogInButton afterLogin={() => setDialog('login-success')} />
+        <LogInButton afterLogin={() => setDialog("login-success")} />
       </Sidebar>
       <Main>Stuff</Main>
     </>
   );
 };
 
+///////////////// new file ///////////////
+
+import React, { useContext } from "react";
+import { DialogContext } from "./App";
+
 const Dialog = ({ currentDialog }) => {
+  const currentDialog = useContext(DialogContext).dialog;
+
   if (!currentDialog) {
     return null;
   }
@@ -234,7 +252,7 @@ const Dialog = ({ currentDialog }) => {
 ```js live=true
 const App = () => {
   const [count, setCount] = React.useState(0);
-  const [name, setName] = React.useState('');
+  const [name, setName] = React.useState("");
 
   const increment = () => setCount(count + 1);
   const decrement = () => setCount(count - 1);
